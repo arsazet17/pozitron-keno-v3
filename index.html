@@ -193,7 +193,7 @@ th{position:sticky;top:0;background:#18253c;z-index:1}
 let draws=[];
 let filtered=[];
 let autoTimer=null;
-
+let db = null;
 function parseCSVLine(line){
   const out=[];let cur='';let quoted=false;
   for(let i=0;i<line.length;i++){
