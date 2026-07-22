@@ -50,7 +50,7 @@ exports.handler = async (event) => {
   const headers = {"content-type":"application/json; charset=utf-8","access-control-allow-origin":"*","cache-control":"no-store"};
   try {
     const after = Math.max(0,Number(event.queryStringParameters?.after||0));
-    const max = Math.min(200,Math.max(1,Number(event.queryStringParameters?.max||25)));
+    const max = Math.min(40,Math.max(1,Number(event.queryStringParameters?.max||25)));
     const draws=[]; let url=LATEST; const visited=new Set();
     for (let i=0;i<max && url && !visited.has(url);i++) {
       visited.add(url);
