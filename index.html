@@ -485,7 +485,7 @@ async function updateFromLucky(){
     status.textContent='Загрузка обновления...';
     const res=await fetch(url,{cache:'no-store'});
     if(!res.ok)throw new Error('HTTP '+res.status);
-    const text=await res.json();
+    const data=await res.json();
     const incoming=Array.isArray(data)?data:data.draws;
 if(!Array.isArray(incoming))throw new Error('Неверный формат JSON');
     if(!incoming.length)throw new Error('В источнике не найдено корректных тиражей');
