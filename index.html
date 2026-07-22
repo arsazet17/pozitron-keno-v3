@@ -491,7 +491,7 @@ if(!Array.isArray(incoming))throw new Error('Неверный формат JSON'
     if(!incoming.length)throw new Error('В источнике не найдено корректных тиражей');
     const before=draws.length;
     mergeDraws(incoming);
-    localStorage.setItem('kenoDraws',JSON.stringify(draws));
+   // localStorage.setItem('kenoDraws',JSON.stringify(draws));
     status.textContent=`Обновлено. Было ${before}, стало ${draws.length} тиражей.`;
     render();
   }catch(err){
