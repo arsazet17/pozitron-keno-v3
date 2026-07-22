@@ -337,7 +337,7 @@ function render(){
     ['first','last','winner'].forEach(id=>document.getElementById(id).textContent='—');
     renderTable();renderChains();return;
   }
-  const first=draws[0],latest=draws[draws.length-1],previous=draws.length>=2?draws[draws.length-2]:null,beforePrevious=draws.length>=3?draws[draws.length-3]:null,a=analyze(latest);
+  const first=draws[0],latest=draws[draws.length-1],previous=draws.length>=2?draws[draws.length-2]:null,beforePrevious=draws.length>=3?draws[draws.length-3]:null,fourthPrevious=draws.length>=4?draws[draws.length-4]:null,a=analyze(latest);
   document.getElementById('first').textContent=first.draw;
   document.getElementById('last').textContent=latest.draw;
   document.getElementById('winner').textContent='ст'+a.winner;
