@@ -353,7 +353,78 @@ fillDrawCard(beforePrevious,'beforePrevious');
   renderTable();
   renderChains();
 }
-  function fillDrawCard(draw,prefix){
+  function fillDrawCard(draw,prefix,previousDraw){
+  const meta=document.getElementById(prefix+'Meta');
+  const balls=document.getElementById(prefix+'Balls');
+  const stats=document.getElementById(prefix+'Stats');
+
+  if(!draw){
+    meta.textContent='Нет данных';
+    balls.innerHTML='';
+    stats.innerHTML='';
+    return;
+  }
+
+  const a=analyze(draw);
+  const sorted=[...draw.balls].sort((x,y)=>x-y);
+  const previousNumbers=new Set(previousDraw?.balls || []);
+  const formatNumber=n=>String(n).padStart(2,'0');
+
+  const balance=
+    a.even===a.odd
+      ? 'поровну'
+      : a.even>a.odd
+        ? 'больше чётных'
+        : 'больше нечётных';
+
+  const factNumbers=draw.balls.map(formatNumber).join(' ');
+
+  const luckyNumbers=draw.balls.map((n,index)=>{
+    const transition=previousNumbers.has(n);
+    const single=a.counts[col(n)]===1;
+    const samePlace=n===sorted[index];
+
+    return (
+      formatNumber(n)+
+      (transition?'🔸':'')+
+      (single?'☝️':'')+
+      '('+formatNumber(sorted[index])+')'+
+      (samePlace?'📍':'')
+    );
+  }).join('. ')+'.';
+
+  const winnerNumbers=draw.balls
+    .filter(n=>col(n)===a.winner)
+    .map(n=>{
+      const transition=previousNumbers.has(n);
+      const single=a.counts[col(n)]===1;
+
+      return (
+        formatNumber(n)+
+        (transition?'🔸':'')+
+        (single?'☝️':'')
+      );
+    });
+
+  meta.innerHTML=
+    `✅ ${draw.draw} — ${draw.date} ${draw.time} `+
+    `🔴ст${a.winner}, ${balance}; числа:`;
+
+  balls.innerHTML=
+    `<div style="width:100%;line-height:1.7;font-size:18px">`+
+      `${factNumbers}`+
+      `<br><br>`+
+      `Сумма ${a.sum}. Чётных ${a.even} / нечётных ${a.odd}.`+
+      `<br><br>`+
+      `<b>Lucky Numbers</b>`+
+      `<br>${luckyNumbers}`+
+      `<br><br>`+
+      `<b>Числа победного ст${a.winner}:</b>`+
+      `<br>${winnerNumbers.join(', ')} — ${winnerNumbers.length} числа.`+
+    `</div>`;
+
+  stats.innerHTML='';
+}{
   if(!draw){
     document.getElementById(prefix+'Meta').textContent='Нет данных';
     document.getElementById(prefix+'Balls').innerHTML='';
