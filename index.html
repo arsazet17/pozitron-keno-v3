@@ -126,6 +126,19 @@ th{position:sticky;top:0;background:#18253c;z-index:1}
       <div id="latestStats" class="note" style="margin-top:12px"></div>
     </div>
     <div class="card">
+  <h3>Предыдущий тираж</h3>
+  <div id="previousMeta" class="note">Нет данных</div>
+  <div id="previousBalls" class="balls"></div>
+  <div id="previousStats" class="note"></div>
+</div>
+
+<div class="card">
+  <h3>Предпредыдущий тираж</h3>
+  <div id="beforePreviousMeta" class="note">Нет данных</div>
+  <div id="beforePreviousBalls" class="balls"></div>
+  <div id="beforePreviousStats" class="note"></div>
+</div>
+    <div class="card">
       <h3>⛓️ Цепочки столбов</h3>
       <div class="chain-controls">
         <div>
@@ -324,7 +337,7 @@ function render(){
     ['first','last','winner'].forEach(id=>document.getElementById(id).textContent='—');
     renderTable();renderChains();return;
   }
-  const first=draws[0],latest=draws[draws.length-1],a=analyze(latest);
+  const first=draws[0],latest=draws[draws.length-1],previous=draws.length>=2?draws[draws.length-2]:null,beforePrevious=draws.length>=3?draws[draws.length-3]:null,a=analyze(latest);
   document.getElementById('first').textContent=first.draw;
   document.getElementById('last').textContent=latest.draw;
   document.getElementById('winner').textContent='ст'+a.winner;
