@@ -359,12 +359,33 @@ function getDayDraws(date){
     .filter(d=>normalizeTime(d.time)>='00:17')
     .sort((a,b)=>a.draw-b.draw);
 }
-
 function splitChains(dayDraws){
   const chains=[];
-  for(let i=0;i<dayDraws.length;i+=5)chains.push(dayDraws.slice(i,i+5));
+  let current=[];
+
+  dayDraws.forEach((draw,index)=>{
+    if(current.length===0){
+      current.push(draw);
+      return;
+    }
+
+    const previous=dayDraws[index-1];
+    const previousMinutes=normalizeTime(previous.time).split(':').reduce((h,m)=>h*60+ +m);
+    const currentMinutes=normalizeTime(draw.time).split(':').reduce((h,m)=>h*60+ +m);
+
+    if(currentMinutes-previousMinutes>30){
+      chains.push(current);
+      current=[];
+    }
+
+    current.push(draw);
+  });
+
+  if(current.length) chains.push(current);
+
   return chains;
 }
+
 
 function renderChains(){
   const box=document.getElementById('chains');
