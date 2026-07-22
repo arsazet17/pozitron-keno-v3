@@ -344,9 +344,9 @@ function render(){
   document.getElementById('latestMeta').textContent=`№${latest.draw} — ${latest.date} ${latest.time}`;
   document.getElementById('latestBalls').innerHTML=latest.balls.map(n=>`<span class="ball">${String(n).padStart(2,'0')}</span>`).join('');
   const empty=[];for(let c=1;c<=10;c++)if(a.counts[c]===0)empty.push('ст'+c);
-  document.getElementById('latestStats').innerHTML=`Сумма: <b>${a.sum}</b> · чётных ${a.even} / нечётных ${a.odd}<br>Победный: <span class="colwinner">ст${a.winner}</span>${empty.length?` · <span class="empty">пустые: ${empty.join(', ')}</span>`:''}`;fillDrawCard(previous,'previous');
-fillDrawCard(beforePrevious,'beforePrevious');
-  if(!document.getElementById('chainDate').value){
+  document.getElementById('latestStats').innerHTML=`Сумма: <b>${a.sum}</b> · чётных ${a.even} / нечётных ${a.odd}<br>Победный: <span class="colwinner">ст${a.winner}</span>${empty.length?' · <span class="empty">пустые: '+empty.join(', ')+'</span>':''}`;fillDrawCard(latest,'latest',previous);
+fillDrawCard(previous,'previous',beforePrevious);
+  fillDrawCard(beforePrevious,'beforePrevious',fourthPrevious);
     document.getElementById('chainDate').value=normalizeDate(latest.date);
   }
   filtered=[];
