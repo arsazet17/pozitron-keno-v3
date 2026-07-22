@@ -372,9 +372,9 @@ function renderChains(){
     return `<div class="chain-block">
       <div class="chain-head">
         <span>${seq}</span>
-        <button class="${complete?'':'warning'}" onclick="selectChain('${date}',${index})">${complete?'Искать продолжения':'Неполная цепочка'}</button>
+        <button style="${index===chains.length-1?'':'display:none'}" onclick="selectChain('${date}',${index})">${index===chains.length-1?'Искать продолжения':''}</button>
       </div>
-      ${rows}
+      ${index===chains.length-1 ? rows : ''}
       ${complete?'<div class="break-row">☕ перерыв 1 час</div>':'<div class="break-row">Открытая цепочка — ожидаются следующие тиражи</div>'}
     </div>`;
   }).join('');
