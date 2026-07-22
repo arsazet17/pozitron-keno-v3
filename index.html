@@ -194,7 +194,25 @@ let draws=[];
 let filtered=[];
 let autoTimer=null;
 let db = null;
-function parseCSVLine(line){
+(async ()=>{
+  try{
+    await openDB();
+    const tx=db.transaction('draws','readonly');
+    const store=tx.objectStore('draws');
+    const all=await new Promise((resolve,reject)=>{
+      const req=store.getAll();
+      req.onsuccess=()=>resolve(req.result);
+      req.onerror=()=>reject(req.error);
+    });
+    if(all.length){
+      draws=all.sort((a,b)=>a.draw-b.draw);
+      render();
+    }
+  }catch(e){
+    console.log(e);
+  }
+})();
+  function parseCSVLine(line){
   const out=[];let cur='';let quoted=false;
   for(let i=0;i<line.length;i++){
     const ch=line[i];
