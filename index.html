@@ -232,12 +232,36 @@ function parseCSV(text){
   return [...unique.values()].sort((a,b)=>a.draw-b.draw);
 }
 
-function mergeDraws(incoming){
+function openDB(){return new Promise((resolve,reject)=>{ 
+    const request=indexedDB.open('pozitronKenoDB',1);
+    request.onupgradeneeded=()=>{
+      const database=request.result;
+      if(!database.objectStoreNames.contains('draws')){
+        database.createObjectStore('draws',{keyPath:'draw'});
+      }
+    };
+    request.onsuccess=()=>{
+      db=request.result;
+      resolve(db);
+    };
+    request.onerror=()=>reject(request.error);
+  });
+}
+  function mergeDraws(incoming){
   const map=new Map(draws.map(d=>[d.draw,d]));
   incoming.forEach(d=>map.set(d.draw,d));
   draws=[...map.values()].sort((a,b)=>a.draw-b.draw);
 }
-
+async function saveDrawsToDB(items){
+  if(!db)await openDB();
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction('draws','readwrite');
+    const store=tx.objectStore('draws');
+    items.forEach(item=>store.put(item));
+    tx.oncomplete=()=>resolve();
+    tx.onerror=()=>reject(tx.error);
+  });
+}
 function col(n){const r=n%10;return r===0?10:r}
 
 function analyze(d){
@@ -491,6 +515,7 @@ if(!Array.isArray(incoming))throw new Error('Неверный формат JSON'
     if(!incoming.length)throw new Error('В источнике не найдено корректных тиражей');
     const before=draws.length;
     mergeDraws(incoming);
+    await saveDrawsToDB(incoming);
    // localStorage.setItem('kenoDraws',JSON.stringify(draws));
     status.textContent=`Обновлено. Было ${before}, стало ${draws.length} тиражей.`;
     render();
