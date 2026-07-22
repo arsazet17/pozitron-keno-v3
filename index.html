@@ -368,10 +368,10 @@ function renderChains(){
       const a=analyze(d);
       return `<div class="chain-row"><div>№${d.draw}</div><div>${normalizeTime(d.time)}</div><div><span class="chain-chip">ст${a.winner}</span></div></div>`;
     }).join('');
-    const seq=chain.map(d=>`№${d.draw} (ст${analyze(d).winner})`).join(' → ');
+    const seq=`${chain[0].draw}–${chain[chain.length-1].draw} | ${chain[0].date} ${chain[0].time}–${chain[chain.length-1].time} | цепочка: ${chain.map(d=>analyze(d).winner).join('-')}`;
     return `<div class="chain-block">
       <div class="chain-head">
-        <span>Цепочка ${index+1}: ${seq}</span>
+        <span>${seq}</span>
         <button class="${complete?'':'warning'}" onclick="selectChain('${date}',${index})">${complete?'Искать продолжения':'Неполная цепочка'}</button>
       </div>
       ${rows}
