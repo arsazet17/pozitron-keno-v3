@@ -534,6 +534,7 @@ if(!Array.isArray(incoming))throw new Error('Неверный формат JSON'
     const before=draws.length;
     mergeDraws(incoming);
     await saveDrawsToDB(incoming);
+    await saveDrawsToDB(draws);
    // localStorage.setItem('kenoDraws',JSON.stringify(draws));
     status.textContent=`Обновлено. Было ${before}, стало ${draws.length} тиражей.`;
     render();
