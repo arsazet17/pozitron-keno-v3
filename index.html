@@ -351,6 +351,28 @@ function render(){
   filtered=[];
   renderTable();
   renderChains();
+}function fillDrawCard(draw,prefix){
+  if(!draw){
+    document.getElementById(prefix+'Meta').textContent='Нет данных';
+    document.getElementById(prefix+'Balls').innerHTML='';
+    document.getElementById(prefix+'Stats').innerHTML='';
+    return;
+  }
+
+  const a=analyze(draw);
+  const empty=[];
+  for(let c=1;c<=10;c++){
+    if(a.counts[c]===0) empty.push('ст'+c);
+  }
+
+  document.getElementById(prefix+'Meta').textContent=
+    `№${draw.draw} — ${draw.date} ${draw.time}`;
+
+  document.getElementById(prefix+'Balls').innerHTML=
+    draw.balls.map(n=>`<span class="ball">${String(n).padStart(2,'0')}</span>`).join('');
+
+  document.getElementById(prefix+'Stats').innerHTML=
+    `Сумма: <b>${a.sum}</b> · чётных ${a.even} / нечётных ${a.odd}<br>Победный: <span class="colwinner">ст${a.winner}</span>${empty.length?' · пустые: '+empty.join(', '):''}`;
 }
 
 function getDayDraws(date){
