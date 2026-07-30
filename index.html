@@ -1,706 +1,312 @@
-.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.note{font-size:13px;color:var(--muted);line-height:1.45}
-.filters{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
-.filters input,.filters select{width:100%}
-.chain-controls{display:grid;grid-template-columns:minmax(180px,260px) 1fr;gap:10px;align-items:end}
-.chain-list{display:grid;gap:12px;margin-top:12px}
-.chain-block{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#0d1728}
-.chain-head{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;padding:10px 12px;background:#18253c;font-weight:700}
-.chain-row{display:grid;grid-template-columns:90px 110px 1fr;gap:10px;padding:9px 12px;border-top:1px solid var(--line);align-items:center}
-.chain-seq{display:flex;flex-wrap:wrap;gap:7px}
-.chain-chip{display:inline-flex;align-items:center;justify-content:center;min-width:42px;padding:7px 9px;border-radius:999px;background:#153824;color:#86efac;font-weight:700;border:1px solid #286a42}
-.break-row{text-align:center;padding:12px;background:#241f13;color:#fde68a;border-top:1px solid #66551e;font-weight:700}
-.cont-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.cont-card{background:#0a1323;border:1px solid var(--line);border-radius:12px;padding:12px}
-.cont-title{font-weight:700;margin-bottom:8px}
-.cont-item{display:grid;grid-template-columns:1fr auto;gap:8px;padding:7px 0;border-bottom:1px solid #21304a}
-.cont-item:last-child{border-bottom:0}
-.badge{display:inline-block;background:#253654;border:1px solid #456083;border-radius:999px;padding:3px 8px}
-.auto-grid{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:end}
-
-.small{font-size:12px;color:var(--muted)}
-.draw-list{display:grid;gap:12px;margin-top:12px}
-.draw-card{background:#0d1728;border:1px solid var(--line);border-radius:14px;padding:14px 15px}
-.draw-number{font-size:22px;font-weight:800;line-height:1.15}
-.draw-date{margin-top:5px;font-size:16px;color:#dbeafe}
-.draw-meta{margin-top:8px;font-size:16px;font-weight:700}
-.draw-numbers{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:6px 4px;margin-top:13px;font-family:Consolas,"Courier New",monospace;font-size:16px;font-weight:700;letter-spacing:.2px}
-.draw-num{text-align:center;background:#17253b;border:1px solid #2e4363;border-radius:7px;padding:6px 1px;white-space:nowrap}
-.draw-card:hover{border-color:#456083}
-
-@media(max-width:850px){
-  .filters,.cont-grid{grid-template-columns:1fr}
-  .chain-controls,.auto-grid{grid-template-columns:1fr}
-}
-@media(max-width:760px){
-  .two{grid-template-columns:1fr}
-  .wrap{padding:10px}
-  .card{padding:12px}
-  .chain-row{grid-template-columns:1fr}
-  th,td{padding:7px;font-size:12px}
-  .scroll{max-height:520px}
-  .draw-card{padding:13px 10px}
-  .draw-number{font-size:21px}
-  .draw-date,.draw-meta{font-size:15px}
-  .draw-numbers{grid-template-columns:repeat(10,minmax(0,1fr));gap:5px 2px;font-size:14px}
-  .draw-num{padding:5px 0;border-radius:6px}
-}
-</style>
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#071b4d">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Yulia TOP-3">
+  <title>Yulia TOP-3 v1.0.16 — архивы по времени и ИИ Позитрон</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon-192.png" type="image/png">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="styles.css?v=1.0.16">
+  <script>
+    window.TOP3_BUILD = '1.0.16';
+</script>
 </head>
 <body>
-<div class="wrap">
-  <h1>🎯 ПОЗИТРОН КЕНО v3</h1>
-  <div class="sub">Цепочки по 5 тиражей, исторические продолжения, поиск по столбам, числам и окончаниям.</div>
-
-  <div class="card">
-    <div class="toolbar">
-      <label class="file-label">📂 Загрузить CSV<input id="fileInput" type="file" accept=".csv,text/csv"></label>
-      <button class="secondary" id="saveData">💾 Сохранить базу</button>
-      <button class="secondary" id="loadData">↩️ Открыть сохранённую</button>
-      <button class="danger" id="clearData">Очистить</button>
-    </div>
-    <div id="status" class="status">Выберите файл КЕНО CSV или откройте сохранённую базу.</div>
+  <div id="loading" class="loading" role="status" aria-live="polite">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span id="loadingText">Загружаю архив тиражей…</span>
   </div>
 
-  <div class="card" style="margin-top:12px">
-    <h3>🔄 Автообновление Lucky Numbers</h3>
-    <div class="auto-grid">
+  <header class="topbar">
+    <div class="brand">
+      <img src="icon-192.png" alt="Логотип Yulia TOP-3">
       <div>
-        <div class="label">URL CSV / совместимого источника</div>
-        <input id="luckyUrl" type="url" placeholder="https://.../keno.csv">
+        <h1>Yulia TOP-3</h1>
+        <p><span class="version">v1.0.16</span> <span id="dbBadge">База загружается…</span></p>
       </div>
-      <button id="updateLucky">Обновить сейчас</button>
-      <button class="secondary" id="toggleAuto">Авто: выкл.</button>
     </div>
-    <div class="small" style="margin-top:8px">Автообновление выполняется каждые 5 минут. Источник должен разрешать загрузку из браузера (CORS) и отдавать CSV в формате базы.</div>
-  </div>
+    <button id="refreshBtn" class="icon-btn" type="button" aria-label="Проверить новые тиражи" title="Проверить новые тиражи">↻</button>
+  </header>
 
-  <div class="grid" style="margin-top:12px">
-    <div class="card"><div class="label">Тиражей</div><div id="count" class="big">0</div></div>
-    <div class="card"><div class="label">Первый тираж</div><div id="first" class="big">—</div></div>
-    <div class="card"><div class="label">Последний тираж</div><div id="last" class="big">—</div></div>
-    <div class="card"><div class="label">Победный столб последнего</div><div id="winner" class="big">—</div></div>
-  </div>
-
-  <div class="two" style="margin-top:12px">
-    <div class="card">
-      <h3>Последний тираж</h3>
-      <div id="latestMeta" class="note">Нет данных</div>
-      <div id="latestBalls" class="balls" style="margin-top:12px"></div>
-      <div id="latestStats" class="note" style="margin-top:12px"></div>
-    </div>
-    <div class="card">
-  <h3>Предыдущий тираж</h3>
-  <div id="previousMeta" class="note">Нет данных</div>
-  <div id="previousBalls" class="balls"></div>
-  <div id="previousStats" class="note"></div>
-</div>
-
-<div class="card">
-  <h3>Предпредыдущий тираж</h3>
-  <div id="beforePreviousMeta" class="note">Нет данных</div>
-  <div id="beforePreviousBalls" class="balls"></div>
-  <div id="beforePreviousStats" class="note"></div>
-</div>
-    <div class="card">
-      <h3>⛓️ Цепочки столбов</h3>
-      <div class="chain-controls">
+  <main class="app-shell">
+    <section id="view-home" class="view active" aria-labelledby="homeTitle">
+      <div class="hero-mini">
         <div>
-          <div class="label">Дата цепочек</div>
-          <input id="chainDate" type="date">
+          <span class="eyebrow">ПОСЛЕДНИЙ ТИРАЖ В БАЗЕ</span>
+          <h2 id="homeTitle">Архив «Топ-3»</h2>
         </div>
-        <div class="note">Начало дня — с тиража в 00:17. Цепочки формируются строго по 5 тиражей.</div>
+        <div class="next-draw">
+          <span>Следующий розыгрыш</span>
+          <strong id="nextDraw">—</strong>
+          <small>по московскому времени</small>
+        </div>
       </div>
-      <div id="chainSummary" class="resultbox">Загрузите базу.</div>
-    </div>
-  </div>
 
-  <div class="card" style="margin-top:12px">
-    <h3>Цепочки выбранного дня</h3>
-    <div id="chains" class="chain-list"></div>
-  </div>
+      <section class="panel sync-panel" aria-labelledby="syncTitle">
+        <div class="sync-head">
+          <div>
+            <span class="eyebrow">АВТООБНОВЛЕНИЕ</span>
+            <h3 id="syncTitle">Lucky Numbers</h3>
+          </div>
+          <span id="syncState" class="sync-badge idle">Ожидание</span>
+        </div>
+        <div class="sync-grid">
+          <div><span>Последняя проверка</span><strong id="syncLastCheck">Ещё не выполнялась</strong></div>
+          <div><span>Последнее успешное обновление</span><strong id="syncLastSuccess">—</strong></div>
+          <div><span>Источник</span><strong id="syncSource">GitHub TOP-3 Live</strong></div>
+        </div>
+        <p id="syncMessage" class="sync-message">Свежие тиражи берутся из общего файла GitHub. Проверка — при открытии и каждые 5 минут.</p>
+        <button id="onlineUpdateBtn" class="primary-btn" type="button">Обновить сейчас</button>
+      </section>
 
-  <div class="card" style="margin-top:12px">
-    <h3>🔍 Исторические продолжения после цепочки</h3>
-    <div class="note">Выберите цепочку кнопкой «Искать продолжения». Анализ выполняется отдельно по последним 2, 3 и 4 победным столбам.</div>
-    <div id="selectedChain" class="resultbox">Цепочка не выбрана.</div>
-    <div id="continuations" class="cont-grid" style="margin-top:12px"></div>
-  </div>
+      <div id="latestCards" class="latest-grid"></div>
 
-  <div class="card" style="margin-top:12px">
-    <h3>🔎 Поиск и отбор тиражей</h3>
-    <div class="filters">
-      <div><div class="label">Победный столб</div><select id="filterColumn"><option value="">Все столбы</option><option value="1">ст1</option><option value="2">ст2</option><option value="3">ст3</option><option value="4">ст4</option><option value="5">ст5</option><option value="6">ст6</option><option value="7">ст7</option><option value="8">ст8</option><option value="9">ст9</option><option value="10">ст10</option></select></div>
-      <div><div class="label">Дата от</div><input id="dateFrom" type="date"></div>
-      <div><div class="label">Дата до</div><input id="dateTo" type="date"></div>
-      <div><div class="label">Номер тиража</div><input id="filterDraw" type="number" placeholder="324367"></div>
-    </div>
-    <div class="filters" style="margin-top:10px">
-      <div style="grid-column:span 2"><div class="label">Комбинация чисел</div><input id="comboInput" type="text" placeholder="Например: 03 17 44 68 79"></div>
-      <div><div class="label">Режим комбинации</div><select id="comboMode"><option value="all">Все указанные числа</option><option value="any">Хотя бы одно число</option><option value="exact">Точно 20 чисел</option></select></div>
-      <div><div class="label">Показать тиражей</div><select id="showRows"><option value="20">20</option><option value="50">50</option><option value="100">100</option><option value="500">500</option><option value="999999">Все</option></select></div>
-    </div>
-    <div class="filters" style="margin-top:10px">
-      <div style="grid-column:span 2"><div class="label">Окончания чисел</div><input id="endingInput" type="text" inputmode="numeric" placeholder="Например: 1 4 7 или 147"></div>
-      <div><div class="label">Режим окончаний</div><select id="endingMode"><option value="all">Все окончания должны быть</option><option value="any">Хотя бы одно окончание</option></select></div>
-      <div class="note">Окончание 0 соответствует числам 10, 20, 30…80.</div>
-    </div>
-    <div class="toolbar" style="margin-top:10px">
-      <button id="findBtn">Найти</button>
-      <button class="secondary" id="resetBtn">Сбросить</button>
-      <button id="exportBtn">⬇️ Скачать найденные CSV</button>
-    </div>
-    <div id="filterSummary" class="resultbox">Фильтры не применены.</div>
-  </div>
+      <section class="panel ai-panel" aria-labelledby="aiTitle">
+        <div class="section-head ai-head">
+          <div>
+            <span class="eyebrow">ЭКСПЕРИМЕНТАЛЬНАЯ МОДЕЛЬ</span>
+            <h3 id="aiTitle">ИИ Позитрон по времени</h3>
+          </div>
+          <span id="aiSignalBadge" class="ai-signal weak">Слабый сигнал</span>
+        </div>
+        <p class="panel-note">Модель работает только с архивом выбранного времени: например, 13:40 сравнивается с предыдущими 13:40 по дням. Три поля оцениваются отдельно по модулю 10. Это аналитический эксперимент, а не гарантия результата.</p>
+        <div id="aiContext" class="ai-context"></div>
+        <div id="aiMainPrediction" class="ai-main-prediction"></div>
+        <div id="aiColumnPredictions" class="ai-columns"></div>
+        <div id="aiBacktest" class="ai-backtest"></div>
+        <div class="ai-home-actions"><button id="aiRecalcBtn" class="secondary-btn" type="button">Пересчитать</button><button id="openAiViewBtn" class="primary-btn" type="button">Открыть ИИ по времени</button></div>
+      </section>
 
-  <div class="card" style="margin-top:12px">
-    <h3>Найденные тиражи</h3>
-    <div class="note">Каждый тираж показан отдельной карточкой. Числа расположены ровно: 10 в первой строке и 10 во второй.</div>
-    <div id="drawList" class="draw-list"></div>
-  </div>
+      <section class="panel quick-panel">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">БЫСТРАЯ СВОДКА</span>
+            <h3>Последние 100 тиражей</h3>
+          </div>
+        </div>
+        <div id="quickStats" class="stat-grid"></div>
+      </section>
 
-  <div class="card" style="margin-top:12px">
-    <h3>Как определяется столб</h3>
-    <div class="note">Число относится к столбу по последней цифре: 1, 11, 21… — ст1; 10, 20, 30… — ст10. Побеждает столб с наибольшим количеством чисел. При равенстве берётся столб, который раньше набрал максимум по порядку выпадения.</div>
-  </div>
-</div>
+      <section class="panel">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">ДОБАВИТЬ ФАКТ</span>
+            <h3>Новый тираж вручную</h3>
+          </div>
+        </div>
+        <form id="manualForm" class="manual-form">
+          <label>Номер тиража<input id="manualId" type="number" inputmode="numeric" required></label>
+          <label>Дата<input id="manualDate" type="text" inputmode="numeric" placeholder="30.07.26" required></label>
+          <label>Время<input id="manualTime" type="time" required></label>
+          <div class="digit-inputs" aria-label="Три выпавшие цифры">
+            <label>1<input id="manualA" type="number" min="0" max="9" inputmode="numeric" required></label>
+            <label>2<input id="manualB" type="number" min="0" max="9" inputmode="numeric" required></label>
+            <label>3<input id="manualC" type="number" min="0" max="9" inputmode="numeric" required></label>
+          </div>
+          <button class="primary-btn" type="submit">Сохранить тираж</button>
+        </form>
+      </section>
+    </section>
 
-<script>
-'use strict';
-let draws=[];
-let filtered=[];
-let autoTimer=null;
-let db = null;
-(async ()=>{
-  try{
-    await openDB();
-    const tx=db.transaction('draws','readonly');
-    const store=tx.objectStore('draws');
-    const all=await new Promise((resolve,reject)=>{
-      const req=store.getAll();
-      req.onsuccess=()=>resolve(req.result);
-      req.onerror=()=>reject(req.error);
-    });
-    if(all.length){
-      draws=all.sort((a,b)=>a.draw-b.draw);
-      render();
-    }
-  }catch(e){
-    console.log(e);
-  }
-})();
-  function parseCSVLine(line){
-  const out=[];let cur='';let quoted=false;
-  for(let i=0;i<line.length;i++){
-    const ch=line[i];
-    if(ch==='"'){if(quoted&&line[i+1]==='"'){cur+='"';i++}else quoted=!quoted}
-    else if(ch===','&&!quoted){out.push(cur.trim());cur=''}
-    else cur+=ch;
-  }
-  out.push(cur.trim());
-  return out;
-}
-
-function parseCSV(text){
-  const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(x=>x.trim());
-  const out=[];
-  for(let i=0;i<lines.length;i++){
-    const p=parseCSVLine(lines[i]);
-    let draw,date,time,balls;
-
-    if(i===0 && p.some(x=>/дата|date|номер тиража|draw/i.test(x))) continue;
-
-    if(p.length>=23 && Number.isFinite(Number(p[0]))){
-      draw=Number(p[0]); date=p[1]; time=p[2];
-      balls=p.slice(3,23).map(Number).filter(Number.isFinite);
-    }else if(p.length>=24 && Number.isFinite(Number(p[3]))){
-      date=p[1]; time=p[2]; draw=Number(p[3]);
-      balls=p.slice(4,24).map(Number).filter(Number.isFinite);
-    }
-
-    if(Number.isFinite(draw)&&balls&&balls.length===20){
-      out.push({draw,date:String(date||'').trim(),time:String(time||'').trim(),balls});
-    }
-  }
-  const unique=new Map();
-  out.forEach(d=>unique.set(d.draw,d));
-  return [...unique.values()].sort((a,b)=>a.draw-b.draw);
-}
-
-function openDB(){return new Promise((resolve,reject)=>{ 
-    const request=indexedDB.open('pozitronKenoDB',1);
-    request.onupgradeneeded=()=>{
-      const database=request.result;
-      if(!database.objectStoreNames.contains('draws')){
-        database.createObjectStore('draws',{keyPath:'draw'});
-      }
-    };
-    request.onsuccess=()=>{
-      db=request.result;
-      resolve(db);
-    };
-    request.onerror=()=>reject(request.error);
-  });
-}
-  function mergeDraws(incoming){
-  const map=new Map(draws.map(d=>[d.draw,d]));
-  incoming.forEach(d=>map.set(d.draw,d));
-  draws=[...map.values()].sort((a,b)=>a.draw-b.draw);
-}
-async function saveDrawsToDB(items){
-  if(!db)await openDB();
-  return new Promise((resolve,reject)=>{
-    const tx=db.transaction('draws','readwrite');
-    const store=tx.objectStore('draws');
-    items.forEach(item=>store.put(item));
-    tx.oncomplete=()=>resolve();
-    tx.onerror=()=>reject(tx.error);
-  });
-}
-function col(n){const r=n%10;return r===0?10:r}
-
-function analyze(d){
-  const counts=Array(11).fill(0),reached=Array(11).fill(999);
-  d.balls.forEach(n=>counts[col(n)]++);
-  const max=Math.max(...counts.slice(1));
-  d.balls.forEach((n,i)=>{
-    const c=col(n);
-    if(counts[c]===max&&reached[c]===999){
-      let seen=0;
-      for(let j=0;j<=i;j++)if(col(d.balls[j])===c)seen++;
-      if(seen===max)reached[c]=i;
-    }
-  });
-  let winner=1;
-  for(let c=2;c<=10;c++){
-    if(counts[c]>counts[winner]||(counts[c]===counts[winner]&&reached[c]<reached[winner]))winner=c;
-  }
-  const even=d.balls.filter(n=>n%2===0).length;
-  return {counts,winner,even,odd:20-even,sum:d.balls.reduce((a,b)=>a+b,0)};
-}
-
-function normalizeDate(s){
-  if(!s)return '';
-  const a=String(s).trim().split(/[.\-/]/);
-  if(a.length===3){
-    if(a[0].length===4)return `${a[0]}-${a[1].padStart(2,'0')}-${a[2].padStart(2,'0')}`;
-    let y=a[2];if(y.length===2)y='20'+y;
-    return `${y}-${a[1].padStart(2,'0')}-${a[0].padStart(2,'0')}`;
-  }
-  return String(s);
-}
-
-function normalizeTime(s){
-  const m=String(s||'').match(/(\d{1,2}):(\d{2})/);
-  return m?`${m[1].padStart(2,'0')}:${m[2]}`:'';
-}
-
-function render(){
-  document.getElementById('count').textContent=draws.length.toLocaleString('ru-RU');
-  if(!draws.length){
-    ['first','last','winner'].forEach(id=>document.getElementById(id).textContent='—');
-    renderTable();renderChains();return;
-  }
-  const first=draws[0],latest=draws[draws.length-1],previous=draws.length>=2?draws[draws.length-2]:null,beforePrevious=draws.length>=3?draws[draws.length-3]:null,fourthPrevious=draws.length>=4?draws[draws.length-4]:null,a=analyze(latest);
-  document.getElementById('first').textContent=first.draw;
-  document.getElementById('last').textContent=latest.draw;
-  document.getElementById('winner').textContent='ст'+a.winner;
-  document.getElementById('latestMeta').textContent=`№${latest.draw} — ${latest.date} ${latest.time}`;
-  document.getElementById('latestBalls').innerHTML=latest.balls.map(n=>`<span class="ball">${String(n).padStart(2,'0')}</span>`).join('');
-  const empty=[];for(let c=1;c<=10;c++)if(a.counts[c]===0)empty.push('ст'+c);
-  document.getElementById('latestStats').innerHTML=`Сумма: <b>${a.sum}</b> · чётных ${a.even} / нечётных ${a.odd}<br>Победный: <span class="colwinner">ст${a.winner}</span>${empty.length?' · <span class="empty">пустые: '+empty.join(', ')+'</span>':''}`;
-  fillDrawCard(latest,'latest',previous);
-fillDrawCard(previous,'previous',beforePrevious);
-  fillDrawCard(beforePrevious,'beforePrevious',fourthPrevious);
-    document.getElementById('chainDate').value=normalizeDate(latest.date);
-  }
-  filtered=[];
-  renderTable();
-  renderChains();
-}
-  function fillDrawCard(draw,prefix,previousDraw){
-  const meta=document.getElementById(prefix+'Meta');
-  const balls=document.getElementById(prefix+'Balls');
-  const stats=document.getElementById(prefix+'Stats');
-
-  if(!draw){
-    meta.textContent='Нет данных';
-    balls.innerHTML='';
-    stats.innerHTML='';
-    return;
-  }
-
-  const a=analyze(draw);
-  const sorted=[...draw.balls].sort((x,y)=>x-y);
-  const previousNumbers=new Set(previousDraw?.balls || []);
-  const formatNumber=n=>String(n).padStart(2,'0');
-
-  const balance=
-    a.even===a.odd
-      ? 'поровну'
-      : a.even>a.odd
-        ? 'больше чётных'
-        : 'больше нечётных';
-
-  const factNumbers=draw.balls.map(formatNumber).join(' ');
-
-  const luckyNumbers=draw.balls.map((n,index)=>{
-    const transition=previousNumbers.has(n);
-    const single=a.counts[col(n)]===1;
-    const samePlace=n===sorted[index];
-
-    return (
-      formatNumber(n)+
-      (transition?'🔸':'')+
-      (single?'☝️':'')+
-      '('+formatNumber(sorted[index])+')'+
-      (samePlace?'📍':'')
-    );
-  }).join('. ')+'.';
-
-  const winnerNumbers=draw.balls
-    .filter(n=>col(n)===a.winner)
-    .map(n=>{
-      const transition=previousNumbers.has(n);
-      const single=a.counts[col(n)]===1;
-
-      return (
-        formatNumber(n)+
-        (transition?'🔸':'')+
-        (single?'☝️':'')
-      );
-    });
-
-  meta.innerHTML=
-    `✅ ${draw.draw} — ${draw.date} ${draw.time} `+
-    `🔴ст${a.winner}, ${balance}; числа:`;
-
-  balls.innerHTML=
-    `<div style="width:100%;line-height:1.7;font-size:18px">`+
-      `${factNumbers}`+
-      `<br><br>`+
-      `Сумма ${a.sum}. Чётных ${a.even} / нечётных ${a.odd}.`+
-      `<br><br>`+
-      `<b>Lucky Numbers</b>`+
-      `<br>${luckyNumbers}`+
-      `<br><br>`+
-      `<b>Числа победного ст${a.winner}:</b>`+
-      `<br>${winnerNumbers.join(', ')} — ${winnerNumbers.length} числа.`+
-    `</div>`;
-
-  stats.innerHTML='';
-}
-  if(!draw){
-    document.getElementById(prefix+'Meta').textContent='Нет данных';
-    document.getElementById(prefix+'Balls').innerHTML='';
-    document.getElementById(prefix+'Stats').innerHTML='';
-    return;
-  }
-
-  const a=analyze(draw);
-  const empty=[];
-  for(let c=1;c<=10;c++){
-    if(a.counts[c]===0) empty.push('ст'+c);
-  }
-
-  document.getElementById(prefix+'Meta').textContent=
-    `№${draw.draw} — ${draw.date} ${draw.time}`;
-
-  document.getElementById(prefix+'Balls').innerHTML=
-    draw.balls.map(n=>`<span class="ball">${String(n).padStart(2,'0')}</span>`).join('');
-
-  document.getElementById(prefix+'Stats').innerHTML=
-    `Сумма: <b>${a.sum}</b> · чётных ${a.even} / нечётных ${a.odd}<br>Победный: <span class="colwinner">ст${a.winner}</span>${empty.length?' · пустые: '+empty.join(', '):''}`;
-}
-
-function getDayDraws(date){
-  return draws
-    .filter(d=>normalizeDate(d.date)===date)
-    .filter(d=>normalizeTime(d.time)>='00:17')
-    .sort((a,b)=>a.draw-b.draw);
-}
-function splitChains(dayDraws){
-  const chains=[];
-  let current=[];
-
-  dayDraws.forEach((draw,index)=>{
-    if(current.length===0){
-      current.push(draw);
-      return;
-    }
-
-    const previous=dayDraws[index-1];
-    const previousMinutes=normalizeTime(previous.time).split(':').reduce((h,m)=>h*60+ +m);
-    const currentMinutes=normalizeTime(draw.time).split(':').reduce((h,m)=>h*60+ +m);
-
-    if(currentMinutes-previousMinutes>30){
-      chains.push(current);
-      current=[];
-    }
-
-    current.push(draw);
-  });
-
-  if(current.length) chains.push(current);
-
-  return chains;
-}
-
-
-function renderChains(){
-  const box=document.getElementById('chains');
-  const date=document.getElementById('chainDate').value;
-  if(!draws.length){box.innerHTML='';document.getElementById('chainSummary').textContent='Загрузите базу.';return}
-  if(!date){box.innerHTML='';document.getElementById('chainSummary').textContent='Выберите дату.';return}
-  const day=getDayDraws(date);
-  const chains=splitChains(day);
-  document.getElementById('chainSummary').innerHTML=`Дата: <b>${date}</b> · тиражей с 00:17: <b>${day.length}</b> · цепочек: <b>${chains.length}</b>`;
-  if(!day.length){box.innerHTML='<div class="resultbox">На эту дату тиражи не найдены.</div>';return}
-  box.innerHTML=chains.map((chain,index)=>{
-    const complete=chain.length===5;
-    const rows=chain.map(d=>{
-      const a=analyze(d);
-      return `<div class="chain-row"><div>№${d.draw}</div><div>${normalizeTime(d.time)}</div><div><span class="chain-chip">ст${a.winner}</span></div></div>`;
-    }).join('');
-    const seq=`${chain[0].draw}–${chain[chain.length-1].draw} | ${chain[0].date} ${chain[0].time}–${chain[chain.length-1].time} | цепочка: ${chain.map(d=>analyze(d).winner).join('-')}`;
-    return `<div class="chain-block">
-      <div class="chain-head">
-        <span>${seq}</span>
-        <button style="${index===chains.length-1?'':'display:none'}" onclick="selectChain('${date}',${index})">${index===chains.length-1?'Искать продолжения':''}</button>
+    <section id="view-archive" class="view" aria-labelledby="archiveTitle">
+      <div class="page-title">
+        <span class="eyebrow">ВСЯ ИСТОРИЯ</span>
+        <h2 id="archiveTitle">Архив тиражей</h2>
+        <p id="archiveInfo">—</p>
       </div>
-      ${index===chains.length-1 ? rows : ''}
-      ${complete?'<div class="break-row">☕ перерыв 1 час</div>':'<div class="break-row">Открытая цепочка — ожидаются следующие тиражи</div>'}
-    </div>`;
-  }).join('');
-}
+      <section class="panel time-archive-panel" aria-labelledby="archiveTimeTitle">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">10 АРХИВОВ ПО ВРЕМЕНИ</span>
+            <h3 id="archiveTimeTitle">Выбери время тиража</h3>
+          </div>
+        </div>
+        <div id="archiveTimeChips" class="time-chip-row" role="group" aria-label="Время архива"></div>
+        <p id="archiveTimeSummary" class="time-summary">—</p>
+      </section>
 
-function selectChain(date,index){
-  const chain=splitChains(getDayDraws(date))[index];
-  if(!chain||!chain.length)return;
-  const seq=chain.map(d=>analyze(d).winner);
-  document.getElementById('selectedChain').innerHTML=`Выбрана цепочка: <b>${seq.map(x=>'ст'+x).join(' — ')}</b><br>Тиражи: ${chain.map(x=>x.draw).join(', ')}`;
-  renderContinuations(seq);
-}
+      <section class="panel archive-mode-panel" aria-labelledby="archiveModeTitle">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">РЕЖИМ АРХИВА</span>
+            <h3 id="archiveModeTitle">Комбинации и Позитроны</h3>
+          </div>
+        </div>
+        <div class="archive-mode-grid" role="group" aria-label="Режим отображения архива">
+          <button class="archive-mode-btn active" data-archive-mode="normal" type="button">Обычный архив</button>
+          <button class="archive-mode-btn" data-archive-mode="normal-diff" type="button">Обычный + разница</button>
+          <button class="archive-mode-btn" data-archive-mode="mirror" type="button">Зеркальный архив</button>
+          <button class="archive-mode-btn" data-archive-mode="mirror-diff" type="button">Зеркальный + разница</button>
+        </div>
+        <p id="archiveModeHelp" class="archive-mode-help">Показываются фактические комбинации из трёх независимых полей 0–9.</p>
+      </section>
+      <section class="panel filters archive-filters">
+        <label>Поиск: +106 — точная разница; 106 — точная комбинация; №267106 — тираж<input id="archiveSearch" type="search" placeholder="Например: +106, 106 или №267106"></label>
+        <div class="filter-grid">
+          <label>Область поиска<select id="archiveSearchScope"><option value="selected">Только выбранное время</option><option value="all">Все 10 времён</option></select></label>
+          <label>Показывать<select id="archiveLimit"><option value="50">50 тиражей</option><option value="100">100 тиражей</option><option value="250">250 тиражей</option></select></label>
+        </div>
+      </section>
+      <div id="archiveList" class="archive-list"></div>
+      <button id="loadMoreBtn" class="secondary-btn wide" type="button">Показать ещё</button>
+    </section>
 
-function getWinnerSequence(){return draws.map(d=>({draw:d.draw,date:d.date,time:d.time,winner:analyze(d).winner}))}
+    <section id="view-ai" class="view" aria-labelledby="aiTimeTitle">
+      <div class="page-title">
+        <span class="eyebrow">10 СПЕЦИАЛИЗИРОВАННЫХ МОДЕЛЕЙ</span>
+        <h2 id="aiTimeTitle">ИИ Позитрон по времени</h2>
+        <p>Каждая модель обучается только на переходах одного времени: 13:40 → 13:40 следующего дня, 16:25 → 16:25 и так далее.</p>
+      </div>
+      <section class="panel time-archive-panel">
+        <div class="section-head"><div><span class="eyebrow">ВРЕМЯ МОДЕЛИ</span><h3>Выбери архив</h3></div></div>
+        <div id="aiTimeChips" class="time-chip-row" role="group" aria-label="Время ИИ-модели"></div>
+        <p id="aiTimeSummary" class="time-summary">—</p>
+      </section>
+      <section class="panel ai-panel" aria-labelledby="aiTimePanelTitle">
+        <div class="section-head ai-head">
+          <div>
+            <span class="eyebrow">ПРОГНОЗ ПЕРЕХОДА ПО ДНЯМ</span>
+            <h3 id="aiTimePanelTitle">ИИ Позитрон</h3>
+          </div>
+          <span id="aiTimeSignalBadge" class="ai-signal weak">Слабый сигнал</span>
+        </div>
+        <p class="panel-note">Основная цифра и два резерва рассчитываются отдельно для каждого поля. Зеркальный переход показывается как точное преобразование основного, а не как второй независимый прогноз.</p>
+        <div id="aiTimeContext" class="ai-context"></div>
+        <div id="aiTimeMainPrediction" class="ai-main-prediction"></div>
+        <div id="aiTimeColumnPredictions" class="ai-columns"></div>
+        <div id="aiTimeBacktest" class="ai-backtest"></div>
+        <button id="aiTimeRecalcBtn" class="secondary-btn wide" type="button">Пересчитать модель выбранного времени</button>
+      </section>
+    </section>
 
-function findContinuations(pattern){
-  const seq=getWinnerSequence();
-  const counts=new Map();
-  const examples=new Map();
-  for(let i=0;i<=seq.length-pattern.length-1;i++){
-    let ok=true;
-    for(let j=0;j<pattern.length;j++)if(seq[i+j].winner!==pattern[j]){ok=false;break}
-    if(ok){
-      const next=seq[i+pattern.length];
-      counts.set(next.winner,(counts.get(next.winner)||0)+1);
-      if(!examples.has(next.winner))examples.set(next.winner,[]);
-      if(examples.get(next.winner).length<3)examples.get(next.winner).push(next.draw);
-    }
-  }
-  return [...counts.entries()]
-    .map(([winner,count])=>({winner,count,examples:examples.get(winner)||[]}))
-    .sort((a,b)=>b.count-a.count||a.winner-b.winner);
-}
+    <section id="view-analysis" class="view" aria-labelledby="analysisTitle">
+      <div class="page-title">
+        <span class="eyebrow">СТАТИСТИКА БАЗЫ</span>
+        <h2 id="analysisTitle">Анализ цифр</h2>
+        <p>Статистика не гарантирует выигрыш. Она показывает только фактические частоты архива.</p>
+      </div>
+      <section class="panel range-panel">
+        <label>Период анализа<select id="analysisRange"><option value="50">Последние 50</option><option value="100" selected>Последние 100</option><option value="500">Последние 500</option><option value="2000">Последние 2000</option><option value="all">Вся база</option></select></label>
+      </section>
 
-function continuationCard(length,pattern){
-  const found=findContinuations(pattern);
-  const total=found.reduce((s,x)=>s+x.count,0);
-  return `<div class="cont-card">
-    <div class="cont-title">Последние ${length}: ${pattern.map(x=>'ст'+x).join(' — ')}</div>
-    <div class="small">Найдено исторических совпадений: ${total}</div>
-    <div style="margin-top:8px">
-      ${found.length?found.map(x=>`<div class="cont-item"><div><b>→ ст${x.winner}</b><div class="small">примеры тиражей: ${x.examples.join(', ')}</div></div><span class="badge">${x.count} раз</span></div>`).join(''):'<div class="note">Совпадений с продолжением не найдено.</div>'}
-    </div>
-  </div>`;
-}
+      <section class="panel digit-search-panel" aria-labelledby="digitSearchTitle">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">ПОИСК ПО АРХИВУ</span>
+            <h3 id="digitSearchTitle">Одна, две или три цифры</h3>
+          </div>
+        </div>
+        <p class="panel-note">Ищи отдельную цифру, точную пару или полную тройку. Для каждого совпадения показывается соседняя цепочка: предыдущий → найденный → следующий тираж.</p>
+        <form id="digitSearchForm" class="digit-search-form">
+          <div class="search-mode-grid">
+            <label>Сколько цифр
+              <select id="digitSearchLength">
+                <option value="1">1 цифра</option>
+                <option value="2">2 цифры</option>
+                <option value="3">3 цифры</option>
+              </select>
+            </label>
+            <label>Где искать
+              <select id="digitSearchScope"></select>
+            </label>
+          </div>
+          <div id="digitSearchInputs" class="digit-search-inputs">
+            <label>Цифра 1<input id="digitSearchA" type="number" min="0" max="9" inputmode="numeric" required></label>
+            <label>Цифра 2<input id="digitSearchB" type="number" min="0" max="9" inputmode="numeric"></label>
+            <label>Цифра 3<input id="digitSearchC" type="number" min="0" max="9" inputmode="numeric"></label>
+          </div>
+          <button class="primary-btn" type="submit">Найти совпадения</button>
+        </form>
+        <div id="digitSearchSummary" class="search-summary">Выбери режим и нажми «Найти совпадения».</div>
+        <div id="digitSearchResults" class="search-results"></div>
+      </section>
 
-function renderContinuations(seq){
-  const parts=[2,3,4].map(n=>{
-    const pattern=seq.slice(-n);
-    return pattern.length===n?continuationCard(n,pattern):`<div class="cont-card">Недостаточно элементов для анализа последних ${n}.</div>`;
-  });
-  document.getElementById('continuations').innerHTML=parts.join('');
-}
+      <section class="panel chain-panel" aria-labelledby="chainTitle">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">ЦЕПОЧКИ КАК В КЕНО</span>
+            <h3 id="chainTitle">Поиск продолжения</h3>
+          </div>
+        </div>
+        <p class="panel-note">Приложение берёт последние 1, 2 или 3 тиража и ищет такие же цепочки во всей базе. Продолжения считаются отдельно для каждой позиции и для полной тройки.</p>
+        <div class="chain-controls">
+          <label>Длина цепочки
+            <select id="chainLength">
+              <option value="1">Последний 1 тираж</option>
+              <option value="2">Последние 2 тиража</option>
+              <option value="3">Последние 3 тиража</option>
+            </select>
+          </label>
+          <button id="chainSearchBtn" class="primary-btn" type="button">Искать продолжение</button>
+        </div>
+        <div>
+          <span class="eyebrow">ПОСЛЕДНЯЯ ЦЕПОЧКА</span>
+          <div id="recentChain" class="recent-chain"></div>
+        </div>
+        <div id="chainSearchSummary" class="search-summary"></div>
+        <div id="chainSearchResults" class="chain-results"></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><div><span class="eyebrow">ПОЗИЦИИ 1–2–3</span><h3>Частота цифр 0–9</h3></div></div>
+        <div id="frequencyCharts" class="frequency-wrap"></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><div><span class="eyebrow">ПЕРЕХОДЫ</span><h3>Что чаще шло после последних цифр</h3></div></div>
+        <div id="transitionCards" class="transition-grid"></div>
+      </section>
+      <section class="panel">
+        <div class="section-head"><div><span class="eyebrow">КОМБИНАЦИИ</span><h3>Частые точные тройки</h3></div></div>
+        <div id="comboTable" class="combo-list"></div>
+      </section>
+    </section>
 
-function comboNums(){
-  return [...new Set((document.getElementById('comboInput').value.match(/\d+/g)||[]).map(Number).filter(n=>n>=1&&n<=80))]
-}
+    <section id="view-data" class="view" aria-labelledby="dataTitle">
+      <div class="page-title">
+        <span class="eyebrow">БАЗА И РЕЗЕРВ</span>
+        <h2 id="dataTitle">Данные приложения</h2>
+        <p>Все импортированные тиражи сохраняются в постоянной базе браузера с защитой от дублей по номеру.</p>
+      </div>
+      <section class="panel data-status">
+        <div><span>Тиражей в базе</span><strong id="dataCount">—</strong></div>
+        <div><span>Первый тираж</span><strong id="dataFirst">—</strong></div>
+        <div><span>Последний тираж</span><strong id="dataLast">—</strong></div>
+      </section>
+      <section class="panel online-data-panel">
+        <div class="section-head"><div><span class="eyebrow">СВЕЖИЕ ТИРАЖИ</span><h3>Автозагрузка из Lucky Numbers</h3></div></div>
+        <p id="dataSyncSummary">При открытии приложения и каждые 15 минут выполняется безопасная проверка. Уже сохранённые тиражи не заменяются.</p>
+        <button id="dataOnlineUpdateBtn" class="secondary-btn" type="button">Проверить новые тиражи</button>
+      </section>
+      <section class="panel action-stack">
+        <label class="file-btn">Импортировать CSV<input id="csvInput" type="file" accept=".csv,text/csv" hidden></label>
+        <button id="exportCsvBtn" class="secondary-btn" type="button">Экспорт всей базы в CSV</button>
+        <button id="exportJsonBtn" class="secondary-btn" type="button">Резервная копия JSON</button>
+        <label class="file-btn secondary">Восстановить из JSON<input id="jsonInput" type="file" accept=".json,application/json" hidden></label>
+        <button id="resetSeedBtn" class="danger-btn" type="button">Восстановить встроенный архив</button>
+      </section>
+      <section class="panel schedule-panel">
+        <div class="section-head"><div><span class="eyebrow">РАСПИСАНИЕ</span><h3>Розыгрыши по Москве</h3></div></div>
+        <p>02:40 · 04:40 · 06:40 · 07:40 · 09:40 · 11:40 · 13:40 · 16:25 · 21:25 · 22:40</p>
+      </section>
+    </section>
+  </main>
 
-function endingNums(){
-  const raw=document.getElementById('endingInput').value.trim();
-  if(!raw)return [];
-  const digits=raw.includes(' ')
-    ? (raw.match(/\d/g)||[])
-    : raw.replace(/\D/g,'').split('');
-  return [...new Set(digits.map(Number).filter(n=>n>=0&&n<=9))];
-}
+  <nav class="bottom-nav" aria-label="Навигация приложения">
+    <button class="nav-btn active" data-view="home" type="button"><span>⌂</span><b>Главная</b></button>
+    <button class="nav-btn" data-view="archive" type="button"><span>▤</span><b>Архив</b></button>
+    <button class="nav-btn" data-view="ai" type="button"><span>✦</span><b>ИИ</b></button>
+    <button class="nav-btn" data-view="analysis" type="button"><span>⌁</span><b>Анализ</b></button>
+    <button class="nav-btn" data-view="data" type="button"><span>⇅</span><b>Данные</b></button>
+  </nav>
 
-function applyFilters(){
-  if(!draws.length)return alert('Сначала загрузите CSV');
-  const c=document.getElementById('filterColumn').value;
-  const from=document.getElementById('dateFrom').value;
-  const to=document.getElementById('dateTo').value;
-  const drawNo=Number(document.getElementById('filterDraw').value)||null;
-  const combo=comboNums(),mode=document.getElementById('comboMode').value;
-  const endings=endingNums(),endingMode=document.getElementById('endingMode').value;
-  filtered=draws.filter(d=>{
-    const a=analyze(d),dd=normalizeDate(d.date);
-    if(c&&a.winner!==Number(c))return false;
-    if(from&&dd<from)return false;
-    if(to&&dd>to)return false;
-    if(drawNo&&d.draw!==drawNo)return false;
-    if(combo.length){
-      if(mode==='all'&&!combo.every(n=>d.balls.includes(n)))return false;
-      if(mode==='any'&&!combo.some(n=>d.balls.includes(n)))return false;
-      if(mode==='exact'){
-        if(combo.length!==20)return false;
-        const x=[...combo].sort((a,b)=>a-b).join(',');
-        const y=[...d.balls].sort((a,b)=>a-b).join(',');
-        if(x!==y)return false;
-      }
-    }
-    if(endings.length){
-      const present=new Set(d.balls.map(n=>n%10));
-      if(endingMode==='all'&&!endings.every(x=>present.has(x)))return false;
-      if(endingMode==='any'&&!endings.some(x=>present.has(x)))return false;
-    }
-    return true;
-  });
-  renderTable();
-  document.getElementById('filterSummary').innerHTML=`Найдено: <b>${filtered.length.toLocaleString('ru-RU')}</b> тиражей${combo.length?' · числа: '+combo.map(n=>String(n).padStart(2,'0')).join(' '):''}${endings.length?' · окончания: '+endings.join(', '):''}`;
-}
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-function renderTable(){
-  const n=Number(document.getElementById('showRows').value);
-  const hasFilter=document.getElementById('filterSummary').textContent.includes('Найдено');
-  const arr=(filtered.length||hasFilter)?filtered:draws;
-  const shown=arr.slice(-n).reverse();
-  const list=document.getElementById('drawList');
-  if(!shown.length){
-    list.innerHTML='<div class="resultbox">Тиражи не найдены.</div>';
-    return;
-  }
-  list.innerHTML=shown.map(d=>{
-    const a=analyze(d);
-    const numbers=d.balls.map(x=>`<span class="draw-num">${String(x).padStart(2,'0')}</span>`).join('');
-    return `<article class="draw-card">
-      <div class="draw-number">✅ ${d.draw}</div>
-      <div class="draw-date">${d.date} ${normalizeTime(d.time)}</div>
-      <div class="draw-meta">🔴 <span class="colwinner">ст${a.winner}</span> | Ч/Н ${a.even}/${a.odd} | Σ${a.sum}</div>
-      <div class="draw-numbers">${numbers}</div>
-    </article>`;
-  }).join('');
-}
-
-function resetFilters(){
-  ['filterColumn','dateFrom','dateTo','filterDraw','comboInput','endingInput'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('comboMode').value='all';
-  document.getElementById('endingMode').value='all';
-  filtered=[];
-  document.getElementById('filterSummary').textContent='Фильтры сброшены.';
-  renderTable();
-}
-
-function exportFiltered(){
-  const arr=filtered.length?filtered:draws;
-  if(!arr.length)return alert('Нет данных');
-  const rows=[['draw','date','time',...Array.from({length:20},(_,i)=>'n'+(i+1)),'winner_column','sum','even','odd']];
-  arr.forEach(d=>{const a=analyze(d);rows.push([d.draw,d.date,d.time,...d.balls,a.winner,a.sum,a.even,a.odd])});
-  const blob=new Blob(['\uFEFF'+rows.map(r=>r.join(',')).join('\n')],{type:'text/csv;charset=utf-8'});
-  const url=URL.createObjectURL(blob),a=document.createElement('a');
-  a.href=url;a.download='KENO_naydennye_tirazhi.csv';a.click();URL.revokeObjectURL(url);
-}
-
-async function updateFromLucky(){
-  const url=document.getElementById('luckyUrl').value.trim();
-  if(!url)return alert('Укажите URL источника CSV');
-  localStorage.setItem('kenoLuckyUrl',url);
-  const status=document.getElementById('status');
-  try{
-    status.textContent='Загрузка обновления...';
-    const res=await fetch(url,{cache:'no-store'});
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    const data=await res.json();
-    const incoming=Array.isArray(data)?data:data.draws;
-if(!Array.isArray(incoming))throw new Error('Неверный формат JSON');
-    if(!incoming.length)throw new Error('В источнике не найдено корректных тиражей');
-    const before=draws.length;
-    mergeDraws(incoming);
-    await saveDrawsToDB(draws);
-    
-   // localStorage.setItem('kenoDraws',JSON.stringify(draws));
-    status.textContent=`Обновлено. Было ${before}, стало ${draws.length} тиражей.`;
-    render();
-  }catch(err){
-    status.textContent='Автообновление не выполнено: '+err.message+'. Загруженная база сохранена.';
-  }
-}
-
-function toggleAuto(){
-  const btn=document.getElementById('toggleAuto');
-  if(autoTimer){
-    clearInterval(autoTimer);autoTimer=null;
-    localStorage.setItem('kenoAuto','0');
-    btn.textContent='Авто: выкл.';
-  }else{
-    autoTimer=setInterval(updateFromLucky,5*60*1000);
-    localStorage.setItem('kenoAuto','1');
-    btn.textContent='Авто: вкл.';
-    updateFromLucky();
-  }
-}
-
-document.getElementById('fileInput').addEventListener('change',e=>{
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=()=>{
-    const incoming=parseCSV(r.result);
-    if(!incoming.length){document.getElementById('status').textContent='Не удалось распознать CSV.';return}
-    draws=incoming;
-    document.getElementById('status').textContent=`Загружено: ${f.name}. Тиражей: ${draws.length.toLocaleString('ru-RU')}`;
-    render();
-  };
-  r.readAsText(f,'UTF-8');
-});
-
-document.getElementById('saveData').onclick=()=>{
-  if(!draws.length)return alert('Сначала загрузите CSV');
-  localStorage.setItem('kenoDraws',JSON.stringify(draws));
-  document.getElementById('status').textContent='База сохранена в этом браузере.';
-};
-document.getElementById('loadData').onclick=()=>{
-  const x=localStorage.getItem('kenoDraws');
-  if(!x)return alert('Сохранённой базы нет');
-  try{draws=JSON.parse(x);document.getElementById('status').textContent='Сохранённая база открыта.';render()}
-  catch{alert('Сохранённая база повреждена')}
-};
-document.getElementById('clearData').onclick=()=>{
-  draws=[];filtered=[];
-  localStorage.removeItem('kenoDraws');
-  document.getElementById('status').textContent='База очищена.';
-  render();
-};
-document.getElementById('showRows').onchange=renderTable;
-document.getElementById('findBtn').onclick=applyFilters;
-document.getElementById('resetBtn').onclick=resetFilters;
-document.getElementById('exportBtn').onclick=exportFiltered;
-document.getElementById('chainDate').onchange=renderChains;
-document.getElementById('updateLucky').onclick=updateFromLucky;
-document.getElementById('toggleAuto').onclick=toggleAuto;
-
-(function init(){
-  const url=localStorage.getItem('kenoLuckyUrl');
-  if(url)document.getElementById('luckyUrl').value=url;
-  const saved=localStorage.getItem('kenoDraws');
-  if(saved){
-    try{draws=JSON.parse(saved);document.getElementById('status').textContent='Автоматически открыта сохранённая база.';render()}catch{}
-  }
-  if(localStorage.getItem('kenoAuto')==='1'){
-    autoTimer=setInterval(updateFromLucky,5*60*1000);
-    document.getElementById('toggleAuto').textContent='Авто: вкл.';
-  }
-})();
-</script>
+  <script src="top3-data.js?v=1.0.16"></script>
+  <script src="app.js?v=1.0.16"></script>
 </body>
 </html>
